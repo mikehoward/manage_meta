@@ -1,13 +1,16 @@
-require 'test_helper'
+$LOAD_PATH << File.expand_path("../../lib",  __FILE__)
+puts $LOAD_PATH.join("\n")
+require 'test/unit'
 require 'manage_meta'
 
-class ManageMetaTest < ActiveSupport::TestCase
+class ManageMetaTest < Test::Unit::TestCase
   include ManageMeta
   
   class NoToS ; end
   NoToS.send :undef_method, :to_s
 
-  test 'existence of add_meta method' do
+  # test 'existence of add_meta method' do
+  def test_methods_exist
     assert_respond_to self, :add_meta, "responds to add_meta()"
     assert_respond_to self, :del_meta, "responds to del_meta()"
     assert_respond_to self, :add_format, "responds to add_format()"
@@ -15,7 +18,8 @@ class ManageMetaTest < ActiveSupport::TestCase
   end
 
   # add_meta tests
-  test "add_meta argument edge cases" do
+  # test "add_meta argument edge cases" do
+  def test_add_meta_edge_cases
 
     assert_raise(ArgumentError, "name of meta must be present") { add_meta }
     assert_raise(ArgumentError, "value must be present") { add_meta :foo }
@@ -30,7 +34,8 @@ class ManageMetaTest < ActiveSupport::TestCase
     assert_raise(RuntimeError, "illegal option must raise an error") { add_meta :foo, 'value', :bad_opt => 'stuff'}
   end
   
-  test "add_meta adds methods to meta_hash" do
+  # test "add_meta adds methods to meta_hash" do
+  def test_add_meta_adds_meta
     assert_nothing_raised(Exception, "add_meta foo, bar is ok") { add_meta :foo, "bar" }
     assert self.instance_variable_get("@manage_meta_meta_hash").key?('foo'),
       "meta variable 'foo' not defined #{self.instance_variable_get('@manage_meta_meta_hash')}"
@@ -43,7 +48,8 @@ class ManageMetaTest < ActiveSupport::TestCase
       "meta variable 'bar' not defined #{self.instance_variable_get('@manage_meta_meta_hash')}"
   end
   
-  test "add_meta concatenates value and output of block" do
+  # test "add_meta concatenates value and output of block" do
+  def test_add_meta_concats_value_and_block
     add_meta(:foo, 'arg value') { ' block value' }
     assert_equal self.instance_variable_get("@manage_meta_meta_hash")['foo'], 'arg value block value',
       "add meta must concatenate value of both arg value and output of block"
@@ -52,14 +58,16 @@ class ManageMetaTest < ActiveSupport::TestCase
       "add meta must concatenate value of both arg value and output of block with option present"
   end
 
-  test "add_meta with :format argument" do
+  # test "add_meta with :format argument" do
+  def test_add_meta_format_works
     # bad format option
     assert_raise(RuntimeError, "Must not accept undefined format") { add_meta :foo, 'value', :format => :bad_key }
     # good format options
     assert_nothing_raised("Must accept format arg as string") { add_meta :foo, 'value', :format => 'named' }
   end
   
-  test ' del_meta' do
+  # test ' del_meta' do
+  def test_del_meta_deletes_meta_tag
     assert_nothing_raised(Exception, "add_meta foo, bar is ok") { add_meta :foo, "bar" }
     assert self.instance_variable_get("@manage_meta_meta_hash").key?('foo'),
       "meta variable 'foo' not defined #{self.instance_variable_get('@manage_meta_meta_hash')}"
@@ -70,7 +78,8 @@ class ManageMetaTest < ActiveSupport::TestCase
       "meta variable 'foo' should not be defined #{self.instance_variable_get('@manage_meta_meta_hash')}"
   end
   
-  test 'add_format' do
+  # test 'add_format' do
+  def test_add_format_adds_a_format
     format = '<meta foo-type="#{name}" content="#{content}"'
     add_format(:foo, format)
     assert self.instance_variable_get("@manage_meta_format_hash").key?(:foo),
@@ -84,7 +93,8 @@ class ManageMetaTest < ActiveSupport::TestCase
       "add_format adds format properly"
   end
   
-  test 'render_meta' do
+  # test 'render_meta' do
+  def test_render_meta_renders_meta
     assert_match /name="robots"/, render_meta, "render_meta contains robots meta tag"
     assert_match /name="generator"/, render_meta, "render_meta contains generator meta tag" \
       if defined? Rails
