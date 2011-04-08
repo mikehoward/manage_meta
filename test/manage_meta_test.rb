@@ -1,5 +1,4 @@
 $LOAD_PATH << File.expand_path("../../lib",  __FILE__)
-puts $LOAD_PATH.join("\n")
 require 'test/unit'
 require 'manage_meta'
 

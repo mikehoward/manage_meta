@@ -7,6 +7,6 @@ Gem::Specification.new do |s|
   s.homepage = "http://github.com/mikehoward/manage_meta"
   s.summary = "ManageMeta - Yet Another Meta Tag manager for Rails 3"
   s.description = "Provides (semi-)intellegent management of meta tags for Rails 3"
-  s.files = Dir["{app,lib,config,test}/**/*"] + ["MIT-LICENSE", "Rakefile", "Gemfile", "README.markdown"]
+  s.files = Dir["{lib,test}/**/*"] + ["MIT-LICENSE", "Rakefile", "README.markdown"]
   s.version = "0.0.1"
 end
