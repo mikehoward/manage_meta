@@ -1,0 +1,1 @@
+TODO 2011-04-09 Mike add test to ensure helper_method macro is called when present and not when absent

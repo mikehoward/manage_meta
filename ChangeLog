@@ -1,5 +1,8 @@
 2011-04-09 Mike Howard <mike@clove.com>
 
+* lib/manage_meta/manage_meta.rb (included): moved conditional mod.helper_method call from
+     bottom of module to 'included' callback. Explicitly named 'mod' as receiver. now works
+
 * manage_meta.gem (s.version): changed to 0.0.3
 
 * 0.0.2 released

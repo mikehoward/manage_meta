@@ -11,6 +11,9 @@ module ManageMeta
     #    method and 'self' will have the right value when it is run in the context of 'mod' creating
     #    an instance
     # 4. we then define our instance variables so that everything will work properly
+
+    mod.helper_method :render_meta if mod.respond_to? :helper_method
+
     old_initialize = mod.instance_method :initialize
     mod.send(:define_method, :initialize) do |*args, &block|
       result = old_initialize.bind(self).call(*args, &block)
@@ -42,7 +45,6 @@ module ManageMeta
       # add_meta 'canonical', request.fullpath
       result
     end
-  
   end
   
   #--
@@ -126,6 +128,4 @@ module ManageMeta
       @manage_meta_format_hash[@manage_meta_name_to_format[name]].sub('#{name}', name).sub('#{content}', content)
     end.join("\n  ") + "  \n"
   end
-
-  helper_method :render_meta if respond_to? :helper_method
 end
