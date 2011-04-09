@@ -21,7 +21,7 @@ At present there are only two automatically defined: 'robots' and 'generator'. Y
 also redefine them by using _add_meta_ to give them new values.
 
 If there is a meta tag which requires a currently unsupported format, you may add it
-using _add_format_.
+using _add_meta_format_.
 
 Finally, edit app/views/layouts/application.html.erb - or equivalent - to insert
 
@@ -40,7 +40,7 @@ The methods are:
 
 * add_meta - adds a meta tag
 * del_meta - which deletes a meta tag
-* add_format - which adds a meta tag format
+* add_meta_format - which adds a meta tag format
 * render_meta - which returns a string rendering all currently defined meta tags.
 
 The instance variables are:
@@ -92,9 +92,9 @@ _del_meta_ is almost useless. It's there in case you want to get ride of a defau
 where _name_ is something which responds to 'to_s' [or is a string]. If the meta tag is
 defined in @manage_meta_meta_hash, then it will be deleted. Nothing bad happens if it isn't.
 
-#### add_format_ ####
+#### add_meta_format_ ####
 
-`add_format(format_name, format_string)`
+`add_meta_format(format_name, format_string)`
 
 _format_name__ will be converted to a symbol.
 

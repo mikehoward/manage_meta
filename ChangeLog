@@ -1,0 +1,11 @@
+2011-04-09 Mike Howard <mike@clove.com>
+
+* 0.0.2 released
+
+* Rakefile: added tasks 'gem' and 'doc'
+
+* test/manage_meta_test.rb (add_format): changed name to add_meta_format to minimize name collisions
+* README.markdown (add_format): likewise
+* lib/manage_meta/manage_meta.rb (add_format): likewise
+
+* manage_meta.gemspec (s.version): changed to 0.0.2

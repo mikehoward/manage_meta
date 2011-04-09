@@ -23,7 +23,7 @@ module ManageMeta
       }
   
       @manage_meta_name_to_format = {}
-      # set up http-equiv meta tags
+      #-- set up http-equiv meta tags
       ['accept', 'accept-charset', 'accept-encoding', 'accept-language', 'accept-ranges',
         'age',  'allow',  'authorization',  'cache-control',  'connecting', 'content-encoding',
         'content-language', 'content-length', 'content-location', 'content-md5',  'content-range',
@@ -55,7 +55,7 @@ module ManageMeta
   #         of both values.
   #  options:
   #    :format => symbol - where 'symbol' is one of :named, :http_equiv, :canonical, or a format
-  #       added with 'add_format'
+  #       added with 'add_meta_format'
   #    all other options keys are ignored
   #--
   def add_meta(name, opt_value = nil, options = {}, &block)
@@ -95,16 +95,32 @@ module ManageMeta
     end
   end
 
+  #++
+  # del_meta(name) - where _name_ is a string or a symbol.
+  #
+  # if _name_ is in @manage_meta_meta_hash, then it will be deleted
+  #--
   def del_meta(name)
     name = name.to_s
     @manage_meta_meta_hash.delete name if @manage_meta_meta_hash.has_key? name
   end
 
-  def add_format(key, format)
+  #++
+  # add_meta_format(key, format)
+  #
+  # adds the format _format_ to @manage_meta_format_hash using the key _key_
+  #--
+  def add_meta_format(key, format)
     key = key.to_sym
     @manage_meta_format_hash[key] = format
   end
 
+  #++
+  # render_meta
+  #
+  # returns a string consisting of all defined meta names in @manage_meta_meta_hash, formatted
+  # using their name-specific formats and indented two spaces.
+  #--
   def render_meta
     '  ' + @manage_meta_meta_hash.map do |name, content|
       @manage_meta_format_hash[@manage_meta_name_to_format[name]].sub('#{name}', name).sub('#{content}', content)

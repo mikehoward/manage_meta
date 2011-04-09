@@ -12,7 +12,7 @@ class ManageMetaTest < Test::Unit::TestCase
   def test_methods_exist
     assert_respond_to self, :add_meta, "responds to add_meta()"
     assert_respond_to self, :del_meta, "responds to del_meta()"
-    assert_respond_to self, :add_format, "responds to add_format()"
+    assert_respond_to self, :add_meta_format, "responds to add_meta_format()"
     assert_respond_to self, :render_meta, "responds to render_meta()"
   end
 
@@ -77,19 +77,19 @@ class ManageMetaTest < Test::Unit::TestCase
       "meta variable 'foo' should not be defined #{self.instance_variable_get('@manage_meta_meta_hash')}"
   end
   
-  # test 'add_format' do
-  def test_add_format_adds_a_format
+  # test 'add_meta_format' do
+  def test_add_meta_format_adds_a_format
     format = '<meta foo-type="#{name}" content="#{content}"'
-    add_format(:foo, format)
+    add_meta_format(:foo, format)
     assert self.instance_variable_get("@manage_meta_format_hash").key?(:foo),
-      "add_format adds key to format_hash using symbol"
+      "add_meta_format adds key to format_hash using symbol"
     assert self.instance_variable_get("@manage_meta_format_hash")[:foo] == format,
-      "add_format adds format properly"
-    add_format('bar', format)
+      "add_meta_format adds format properly"
+    add_meta_format('bar', format)
     assert self.instance_variable_get("@manage_meta_format_hash").key?(:bar),
-      "add_format adds key to format_hash using string"
+      "add_meta_format adds key to format_hash using string"
     assert self.instance_variable_get("@manage_meta_format_hash")[:bar] == format,
-      "add_format adds format properly"
+      "add_meta_format adds format properly"
   end
   
   # test 'render_meta' do
