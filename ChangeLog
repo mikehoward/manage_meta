@@ -1,3 +1,8 @@
+2011-04-11 Mike Howard <mike@clove.com>
+
+* test/manage_meta_test.rb (ManageMetaTest): added code to define refute() and refute_respond_to()
+    so the tests work for Ruby 1.8.7
+
 2011-04-09 Mike Howard <mike@clove.com>
 
 * lib/manage_meta/manage_meta.rb (included): moved conditional mod.helper_method call from

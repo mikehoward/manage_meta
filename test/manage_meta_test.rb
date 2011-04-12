@@ -7,6 +7,17 @@ class ManageMetaTest < Test::Unit::TestCase
   
   class NoToS ; end
   NoToS.send :undef_method, :to_s
+  
+  # add refute methods for ruby 1.8.7
+  if !self.instance_methods.include? :refute_respond_to
+    def refute_respond_to(obj, func, msg = nil)
+      assert ! obj.respond_to?( func, msg )
+    end
+    
+    def refute(expr, msg = nil)
+      assert ! expr, msg
+    end
+  end
 
   # test 'existence of add_meta method' do
   def test_methods_exist
