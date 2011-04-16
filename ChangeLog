@@ -1,7 +1,26 @@
+2011-04-16 Mike Howard <mike@clove.com>
+
+* lib/manage_meta/manage_meta.rb (included): added guards to old_initialize logic to cover the
+   case where initialize is not defined - as in Rails3 running under Ruby 1.8.7
+   (manage_meta_name_to_sym, manage_meta_sym_to_name): new functions which do what they say they
+     will do. These support converting all hash keys to symbols and emitting meta tag names
+     as Capitalized words joined by hyphens.
+   (add_meta, del_meta, render_meta): modified to use manage_meta_...to... calls
+   test/manage_meta_test.rb (ManageMetaTest): modified to test for symbols as keys and capitalized
+     words in rendering. Added test to make sure included works properly for a class w/o an initialize
+     method
+
+* manage_meta.gem (s.version): changed to 0.0.5
+
+* README.markdown: brought up to date with changes to hashes. Corrected many errors in content
+    and formatting.
+
 2011-04-11 Mike Howard <mike@clove.com>
 
 * test/manage_meta_test.rb (ManageMetaTest): added code to define refute() and refute_respond_to()
     so the tests work for Ruby 1.8.7
+
+* manage_meta.gem (s.version): changed to 0.0.4
 
 2011-04-09 Mike Howard <mike@clove.com>
 

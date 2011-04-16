@@ -14,9 +14,14 @@ module ManageMeta
 
     mod.helper_method :render_meta if mod.respond_to? :helper_method
 
-    old_initialize = mod.instance_method :initialize
+    begin
+      old_initialize = mod.instance_method(:initialize)
+    rescue
+      old_initialize = nil
+    end
     mod.send(:define_method, :initialize) do |*args, &block|
-      result = old_initialize.bind(self).call(*args, &block)
+      result = old_initialize.bind(self).call(*args, &block) unless old_initialize.nil?
+
       @manage_meta_meta_hash = {}
   
       @manage_meta_format_hash = {
@@ -27,23 +32,23 @@ module ManageMeta
   
       @manage_meta_name_to_format = {}
       #-- set up http-equiv meta tags
-      ['accept', 'accept-charset', 'accept-encoding', 'accept-language', 'accept-ranges',
-        'age',  'allow',  'authorization',  'cache-control',  'connecting', 'content-encoding',
-        'content-language', 'content-length', 'content-location', 'content-md5',  'content-range',
-        'content-type', 'date', 'etag', 'expect', 'expires',  'from', 'host', 'if-match', 'if-modified-since',
-        'if-none-match',  'if-range', 'if-unmodified-since',  'last-modified',  'location',
-        'max-forwards', 'pragma', 'proxy-authenticate', 'proxy-authorization',  'range',  'referer',
-        'retry-after',  'server', 'te', 'trailer',  'transfer-encoding',  'upgrade',  'user-agent',
-        'vary', 'via',  'warning',  'www-authenticate', ].each { |name| @manage_meta_name_to_format[name] = :http_equiv }
+      [:accept, :accept_charset, :accept_encoding, :accept_language, :accept_ranges,
+        :age,  :allow,  :authorization,  :cache_control,  :connecting, :content_encoding,
+        :content_language, :content_length, :content_location, :content_md5,  :content_range,
+        :content_type, :date, :etag, :expect, :expires,  :from, :host, :if_match, :if_modified_since,
+        :if_none_match,  :if_range, :if_unmodified_since,  :last_modified,  :location,
+        :max_forwards, :pragma, :proxy_authenticate, :proxy_authorization,  :range,  :referer,
+        :retry_after,  :server, :te, :trailer,  :transfer_encoding,  :upgrade,  :user_agent,
+        :vary, :via,  :warning,  :www_authenticate, ].each { |name| @manage_meta_name_to_format[name] = :http_equiv }
       # set up Google's canonical link tag
-      ['canonical'].each { |name| @manage_meta_name_to_format[name] = :canonical }
+      [:canonical].each { |name| @manage_meta_name_to_format[name] = :canonical }
       # set up normal meta tags
-      ['description', 'keywords', 'language', 'robots'].each { |name| @manage_meta_name_to_format[name] = :named }
+      [:description, :keywords, :language, :robots].each { |name| @manage_meta_name_to_format[name] = :named }
 
       add_meta 'robots', 'index follow'
       add_meta 'generator', "Rails #{Rails.version}" if defined?(Rails)
       # add_meta 'canonical', request.fullpath
-      result
+      result || nil
     end
   end
   
@@ -62,7 +67,7 @@ module ManageMeta
   #--
   def add_meta(name, opt_value = nil, options = {}, &block)
     # make sure name is a string
-    name = name.to_s
+    name = manage_meta_name_to_sym name
 
     # handle optional nonsense
     case
@@ -90,7 +95,8 @@ module ManageMeta
 
     # if format is explicitly called out or if name is not yet known
     if options.has_key?(:format)
-      raise RuntimeError, "Unsuported Format: #{options[:format]}: formats are #{@manage_meta_format_hash.keys.join(',')}" if !@manage_meta_format_hash.has_key?(options[:format].to_sym)
+      raise RuntimeError, "Unsuported Format: #{options[:format]}: formats are #{@manage_meta_format_hash.keys.join(',')}" \
+            if !@manage_meta_format_hash.has_key?(options[:format].to_sym)
       @manage_meta_name_to_format[name] = options[:format].to_sym
     elsif !@manage_meta_name_to_format.has_key?(name)
       @manage_meta_name_to_format[name] = :named
@@ -103,7 +109,7 @@ module ManageMeta
   # if _name_ is in @manage_meta_meta_hash, then it will be deleted
   #--
   def del_meta(name)
-    name = name.to_s
+    name = manage_meta_name_to_sym name
     @manage_meta_meta_hash.delete name if @manage_meta_meta_hash.has_key? name
   end
 
@@ -125,7 +131,15 @@ module ManageMeta
   #--
   def render_meta
     '  ' + @manage_meta_meta_hash.map do |name, content|
-      @manage_meta_format_hash[@manage_meta_name_to_format[name]].sub('#{name}', name).sub('#{content}', content)
+      @manage_meta_format_hash[@manage_meta_name_to_format[name]].sub('#{name}', manage_meta_sym_to_name(name)).sub('#{content}', content)
     end.join("\n  ") + "  \n"
+  end
+  
+  def manage_meta_sym_to_name(sym)
+    sym.to_s.split(/[_-]/).map {|x| x.capitalize }.join('-')
+  end
+  
+  def manage_meta_name_to_sym(name)
+    name.to_s.downcase.gsub(/[-_]+/, '_').to_sym
   end
 end
