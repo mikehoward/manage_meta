@@ -1,55 +1,33 @@
 module ManageMeta
-  def self.included(mod)
-    # OK this is a hack based on section 25.4 of Programming Ruby 1.9 by Dave Thomas
-    # we are using the _included_ hook from Ruby's Module module to run some code
-    # which replaces the 'initialize' routine with one which creates our required instance
-    # data.
-    # 1. We are saving the original 'initialize' as old_initialize.
-    # 2. we execute the private method 'define_method' via mod.send which has the side effect
-    #    of carrying the definition of 'old_initialize' into the closure.
-    # 3. we have to bind 'old_initialize' to the run-time value of 'self' because it is an unbound
-    #    method and 'self' will have the right value when it is run in the context of 'mod' creating
-    #    an instance
-    # 4. we then define our instance variables so that everything will work properly
+  private
+  #- initialize instance variables
+  def _manage_meta_init
+    return if @manage_meta_meta_hash.instance_of? Hash
+    @manage_meta_meta_hash = {}
 
-    mod.helper_method :render_meta if mod.respond_to? :helper_method
+    @manage_meta_format_hash = {
+      :named => '<meta name="#{name}" content="#{content}" char-encoding="utf-8" />',
+      :http_equiv => '<meta http-equiv="#{name}" content="#{content}" char-encoding="utf-8" />',
+      :canonical => '<link rel="canonical" href="#{content}" />',
+    }
 
-    begin
-      old_initialize = mod.instance_method(:initialize)
-    rescue
-      old_initialize = nil
-    end
-    mod.send(:define_method, :initialize) do |*args, &block|
-      result = old_initialize.bind(self).call(*args, &block) unless old_initialize.nil?
+    @manage_meta_name_to_format = {}
+    #-- set up http-equiv meta tags
+    [:accept, :accept_charset, :accept_encoding, :accept_language, :accept_ranges,
+      :age,  :allow,  :authorization,  :cache_control,  :connecting, :content_encoding,
+      :content_language, :content_length, :content_location, :content_md5,  :content_range,
+      :content_type, :date, :etag, :expect, :expires,  :from, :host, :if_match, :if_modified_since,
+      :if_none_match,  :if_range, :if_unmodified_since,  :last_modified,  :location,
+      :max_forwards, :pragma, :proxy_authenticate, :proxy_authorization,  :range,  :referer,
+      :retry_after,  :server, :te, :trailer,  :transfer_encoding,  :upgrade,  :user_agent,
+      :vary, :via,  :warning,  :www_authenticate, ].each { |name| @manage_meta_name_to_format[name] = :http_equiv }
+    # set up Google's canonical link tag
+    [:canonical].each { |name| @manage_meta_name_to_format[name] = :canonical }
+    # set up normal meta tags
+    [:description, :keywords, :language, :robots].each { |name| @manage_meta_name_to_format[name] = :named }
 
-      @manage_meta_meta_hash = {}
-  
-      @manage_meta_format_hash = {
-        :named => '<meta name="#{name}" content="#{content}" char-encoding="utf-8" />',
-        :http_equiv => '<meta http-equiv="#{name}" content="#{content}" char-encoding="utf-8" />',
-        :canonical => '<link rel="canonical" href="#{content}" />',
-      }
-  
-      @manage_meta_name_to_format = {}
-      #-- set up http-equiv meta tags
-      [:accept, :accept_charset, :accept_encoding, :accept_language, :accept_ranges,
-        :age,  :allow,  :authorization,  :cache_control,  :connecting, :content_encoding,
-        :content_language, :content_length, :content_location, :content_md5,  :content_range,
-        :content_type, :date, :etag, :expect, :expires,  :from, :host, :if_match, :if_modified_since,
-        :if_none_match,  :if_range, :if_unmodified_since,  :last_modified,  :location,
-        :max_forwards, :pragma, :proxy_authenticate, :proxy_authorization,  :range,  :referer,
-        :retry_after,  :server, :te, :trailer,  :transfer_encoding,  :upgrade,  :user_agent,
-        :vary, :via,  :warning,  :www_authenticate, ].each { |name| @manage_meta_name_to_format[name] = :http_equiv }
-      # set up Google's canonical link tag
-      [:canonical].each { |name| @manage_meta_name_to_format[name] = :canonical }
-      # set up normal meta tags
-      [:description, :keywords, :language, :robots].each { |name| @manage_meta_name_to_format[name] = :named }
-
-      add_meta 'robots', 'index follow'
-      add_meta 'generator', "Rails #{Rails.version}" if defined?(Rails)
-      # add_meta 'canonical', request.fullpath
-      result || nil
-    end
+    add_meta 'robots', 'index follow'
+    add_meta 'generator', "Rails #{Rails.version}" if defined?(Rails)
   end
   
   #--
@@ -66,8 +44,10 @@ module ManageMeta
   #    all other options keys are ignored
   #--
   def add_meta(name, opt_value = nil, options = {}, &block)
+    _manage_meta_init unless @manage_meta_meta_hash.instance_of? Hash
+    
     # make sure name is a string
-    name = manage_meta_name_to_sym name
+    name = _manage_meta_name_to_sym name
 
     # handle optional nonsense
     case
@@ -109,7 +89,9 @@ module ManageMeta
   # if _name_ is in @manage_meta_meta_hash, then it will be deleted
   #--
   def del_meta(name)
-    name = manage_meta_name_to_sym name
+    _manage_meta_init unless @manage_meta_meta_hash.instance_of? Hash
+    
+    name = _manage_meta_name_to_sym name
     @manage_meta_meta_hash.delete name if @manage_meta_meta_hash.has_key? name
   end
 
@@ -119,6 +101,8 @@ module ManageMeta
   # adds the format _format_ to @manage_meta_format_hash using the key _key_
   #--
   def add_meta_format(key, format)
+    _manage_meta_init unless @manage_meta_meta_hash.instance_of? Hash
+    
     key = key.to_sym
     @manage_meta_format_hash[key] = format
   end
@@ -130,16 +114,19 @@ module ManageMeta
   # using their name-specific formats and indented two spaces.
   #--
   def render_meta
+    _manage_meta_init unless @manage_meta_meta_hash.instance_of? Hash
+    
     '  ' + @manage_meta_meta_hash.map do |name, content|
-      @manage_meta_format_hash[@manage_meta_name_to_format[name]].sub('#{name}', manage_meta_sym_to_name(name)).sub('#{content}', content)
+      @manage_meta_format_hash[@manage_meta_name_to_format[name]].sub('#{name}', _manage_meta_sym_to_name(name)).sub('#{content}', content)
     end.join("\n  ") + "  \n"
   end
   
-  def manage_meta_sym_to_name(sym)
+  private
+  def _manage_meta_sym_to_name(sym)
     sym.to_s.split(/[_-]/).map {|x| x.capitalize }.join('-')
   end
   
-  def manage_meta_name_to_sym(name)
+  def _manage_meta_name_to_sym(name)
     name.to_s.downcase.gsub(/[-_]+/, '_').to_sym
   end
 end

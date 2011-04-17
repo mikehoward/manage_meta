@@ -6,11 +6,6 @@ class NoToS
 end
 NoToS.send( :undef_method, :to_s )
 
-class NoInitializer
-  undef_method :initialize if methods.include? :initialize
-  include ManageMeta
-end
-
 class ManageMetaTest < Test::Unit::TestCase
   include ManageMeta
   
@@ -25,38 +20,51 @@ class ManageMetaTest < Test::Unit::TestCase
     end
   end
 
+  def test__manage_meta_init
+    refute self.instance_variables.include?(:@manage_meta_meta_hash), "self does not contain @manage_meta_meta_hash"
+    self.send(:_manage_meta_init)
+    assert self.instance_variables.include?(:@manage_meta_meta_hash), "self contains @manage_meta_meta_hash"
+  end
+
+  def test__manage_meta_init_is_itempotent
+    self.send(:_manage_meta_init)
+    h = {}
+    self.instance_variables.grep(/manage_meta/).each do |name|
+      h[name] = self.instance_variable_get name
+    end
+    self.send(:_manage_meta_init)
+    assert h.keys == self.instance_variables.grep(/manage_meta/), "no manage_meta instance variables added or removed"
+    h.each do |name, val|
+      assert h[name] == self.instance_variable_get(name), "instance variable #{name} has not changed"
+    end
+  end
+
   # test 'existence of add_meta method' do
   def test_methods_exist
     assert_respond_to self, :add_meta, "responds to add_meta()"
     assert_respond_to self, :del_meta, "responds to del_meta()"
     assert_respond_to self, :add_meta_format, "responds to add_meta_format()"
     assert_respond_to self, :render_meta, "responds to render_meta()"
-    assert_respond_to self, :manage_meta_sym_to_name, "responds to manage_meta_sym_to_name()"
-    assert_respond_to self, :manage_meta_name_to_sym, "responds to manage_meta_name_to_sym()"
+    refute_respond_to self, :_manage_meta_init, "does not respond to _manage_meta_init()"
+    refute_respond_to self, :_manage_meta_sym_to_name, "does not respond to _manage_meta_sym_to_name()"
+    refute_respond_to self, :_manage_meta_name_to_sym, "does not respond to _manage_meta_name_to_sym()"
+    assert self.private_methods.grep(/_manage_meta_init/), "has private method _manage_meta_init"
+    assert self.private_methods.grep(/_manage_meta_name_to_sym/), "has private method _manage_meta_name_to_sym"
+    assert self.private_methods.grep(/_manage_meta_sym_to_name/), "has private method _manage_meta_sym_to_name"
   end
   
-  def test_manage_meta_sym_to_name
+  def test__manage_meta_sym_to_name
     {:foo => 'Foo', :foo_bar => "Foo-Bar", :foo_bar_baz => "Foo-Bar-Baz", "Foo-Bar" => "Foo-Bar",
       "Foo_bar" => "Foo-Bar" }.each do |key, val|
-      assert_equal manage_meta_sym_to_name(key), val, "manage_meta_sym_to_name(#{key}) == #{val}"
+      assert_equal _manage_meta_sym_to_name(key), val, "_manage_meta_sym_to_name(#{key}) == #{val}"
     end
   end
   
-  def test_manage_meta_name_to_sym
+  def test__manage_meta_name_to_sym
     { 'Foo'  => :foo, 'Foo-Bar' => :foo_bar, 'Foo--Bar_Baz' => :foo_bar_baz,
       :foo_bar_baz => :foo_bar_baz, :foo____bar => :foo_bar }.each do |key, val|
-      assert_equal manage_meta_name_to_sym(key), val, "manage_meta_name_to_sym(#{key}) == #{val}"
+      assert_equal _manage_meta_name_to_sym(key), val, "_manage_meta_name_to_sym(#{key}) == #{val}"
     end
-  end
-
-  def test_works_wo_initialize
-    refute NoInitializer.methods.include?(:initialize), "NoInitializer does not have an initialize method"
-    foo = nil
-    assert_nothing_raised(Exception, "instantiating a class w/o an initialize method should work") do
-      foo = NoInitializer.new
-    end
-    assert foo.instance_of?(NoInitializer), "foo is an instance of NoInitializer"
-    refute foo.methods.include?(:initialize), "foo does not have an initialize method"
   end
 
   # add_meta tests

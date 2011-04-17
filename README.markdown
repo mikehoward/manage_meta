@@ -33,21 +33,26 @@ defined meta tags.
 What it Adds
 ------------
 
-ManageMeta defines six (6) methods and three (3) instance variables into all classes
+ManageMeta defines seven (7) methods and three (3) instance variables into all classes
 derived from ApplicationController
 
-The methods are:
+The public methods are:
 
 * `add_meta()` - adds a meta tag
 * `del_meta()` - which deletes a meta tag
 * `add_meta_format()` - which adds a meta tag format
 * `render_meta()` - which returns a string rendering all currently defined meta tags.
-* `manage_meta_sym_to_name` - returns Content-Length when given :content_length, etc.
+
+private methods:
+
+* `_manage_meta_init` - initializes required instance variables. `_manage_meta_init` is
+called automatically from the public methods
+* `_manage_meta_sym_to_name` - returns Content-Length when given :content_length, etc.
 It works with either symbols or strings and strips extra underscores and hyphens
-* `manage_meta_name_to_sym` - returns symbol :foo_bar_baz when given a name of the form 'Foo-Bar-Baz'.
+* `_manage_meta_name_to_sym` - returns symbol :foo_bar_baz when given a name of the form 'Foo-Bar-Baz'.
 It also works when given a symbol and strips extra underscores and hyphens.
 
-The instance variables are three hashes:
+The instance variables are three hashes. None have readers or writers:
 
 * `@manage_meta_meta_hash` - a Hash containing mapping defined meta tag names to content values
 * `@manage_meta_format_hash` - a Hash mapping known meta tag format symbols to actual format strings.
@@ -106,12 +111,12 @@ Nothing bad happens if it isn't.
 `add_meta_format(format_name, format_string)` adds the `format_string` to
 `@manage_meta_format_hash` under the key `format_name`
 
-*format_name* will be converted to a symbol using `manage_meta_sym_to_name()`.
+*format_name* will be converted to a symbol using `_manage_meta_sym_to_name()`.
 
 It's your responsibility to format the string properly:
 `render_meta()` will replace `#{name}` and `#{content}` with the string values given for the meta
 tag - if present. It is not an error to omit either or both `#{name}` and/or `#{content}`.
-The value used for `#{name}` result of calling `manage_meta_sym_to_name()` on the meta element key.
+The value used for `#{name}` result of calling `_manage_meta_sym_to_name()` on the meta element key.
 
 #### render_meta() ####
 
@@ -122,7 +127,7 @@ returns their associated format strings after replacing the `#{name}` and `#{con
 symbols with their values.
 
 `#{name}` is replaced with the meta tag key [as in `:content_type`] passed through
-`manage_meta_sym_to_name()`.
+`_manage_meta_sym_to_name()`.
 
 `#{value}` is replaced by the value assigned in `@manage_meta_meta_hash`.
 
