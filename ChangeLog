@@ -1,5 +1,7 @@
 2011-04-17 Mike Howard <mike@clove.com>
 
+* tests/manage_meta_test.rb (many): added tests for _manage_meta_init.
+
 * lib/manage_meta/manage_meta.rb (included): deleted 'included' method
     and all the fancy stuff - couldn't make it work because it required hacking into
     'initialize' - which seems to be a special method which is hard to hack.

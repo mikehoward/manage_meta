@@ -21,9 +21,9 @@ class ManageMetaTest < Test::Unit::TestCase
   end
 
   def test__manage_meta_init
-    refute self.instance_variables.include?(:@manage_meta_meta_hash), "self does not contain @manage_meta_meta_hash"
+    refute self.instance_variables.map {|x| x.to_sym }.include?(:@manage_meta_meta_hash), "self does not contain @manage_meta_meta_hash"
     self.send(:_manage_meta_init)
-    assert self.instance_variables.include?(:@manage_meta_meta_hash), "self contains @manage_meta_meta_hash"
+    assert self.instance_variables.map {|x| x.to_sym }.include?(:@manage_meta_meta_hash), "self contains @manage_meta_meta_hash"
   end
 
   def test__manage_meta_init_is_itempotent
@@ -33,7 +33,7 @@ class ManageMetaTest < Test::Unit::TestCase
       h[name] = self.instance_variable_get name
     end
     self.send(:_manage_meta_init)
-    assert h.keys == self.instance_variables.grep(/manage_meta/), "no manage_meta instance variables added or removed"
+    assert h.keys.sort == self.instance_variables.grep(/manage_meta/).sort, "no manage_meta instance variables added or removed"
     h.each do |name, val|
       assert h[name] == self.instance_variable_get(name), "instance variable #{name} has not changed"
     end
@@ -45,9 +45,11 @@ class ManageMetaTest < Test::Unit::TestCase
     assert_respond_to self, :del_meta, "responds to del_meta()"
     assert_respond_to self, :add_meta_format, "responds to add_meta_format()"
     assert_respond_to self, :render_meta, "responds to render_meta()"
-    refute_respond_to self, :_manage_meta_init, "does not respond to _manage_meta_init()"
-    refute_respond_to self, :_manage_meta_sym_to_name, "does not respond to _manage_meta_sym_to_name()"
-    refute_respond_to self, :_manage_meta_name_to_sym, "does not respond to _manage_meta_name_to_sym()"
+    if RUBY_VERSION =~ /^1\.9/
+      refute_respond_to self, :_manage_meta_init, "does not respond to _manage_meta_init()"
+      refute_respond_to self, :_manage_meta_sym_to_name, "does not respond to _manage_meta_sym_to_name()"
+      refute_respond_to self, :_manage_meta_name_to_sym, "does not respond to _manage_meta_name_to_sym()"
+    end
     assert self.private_methods.grep(/_manage_meta_init/), "has private method _manage_meta_init"
     assert self.private_methods.grep(/_manage_meta_name_to_sym/), "has private method _manage_meta_name_to_sym"
     assert self.private_methods.grep(/_manage_meta_sym_to_name/), "has private method _manage_meta_sym_to_name"
