@@ -147,12 +147,12 @@ class ManageMetaTest < Test::Unit::TestCase
   
   # test 'render_meta' do
   def test_render_meta_renders_meta
-    assert_match /name="Robots"/, render_meta, "render_meta contains robots meta tag"
-    assert_match /name="Generator"/, render_meta, "render_meta contains generator meta tag" \
+    assert_match(/name="Robots"/, render_meta, "render_meta contains robots meta tag")
+    assert_match(/name="Generator"/, render_meta, "render_meta contains generator meta tag") \
       if defined? Rails
     add_meta :foo, 'a value'
-    assert_match /name="Foo"/, render_meta, "render_meta contains 'foo' meta tag"
-    assert_match /content="a value"/, render_meta, "render_meta tag for foo has content 'a value'"
+    assert_match(/name="Foo"/, render_meta, "render_meta contains 'foo' meta tag")
+    assert_match(/content="a value"/, render_meta, "render_meta tag for foo has content 'a value'")
   end
   
 end

@@ -1,6 +1,9 @@
 module ManageMeta
-  def included(mod)
-    mod.send(:helper_method, :render_meta) if mod.respond_to? :helper_method
+  def self.included(mod)
+    begin
+      mod.send(:helper_method, :render_meta)
+    rescue Exception
+    end
   end
   
   #- initialize instance variables
