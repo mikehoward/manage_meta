@@ -1,5 +1,11 @@
 2011-04-17 Mike Howard <mike@clove.com>
 
+* lib/manage_meta/manage_meta.rb (included) restored 'included' to conditionally invoke 'helper_method'
+    on 'render_meta'.
+  corrected visibility of methods and moved public & protected macros to bottom of module
+
+* versions 0.0.6 & 0.0.7 - in rapid succession
+
 * tests/manage_meta_test.rb (many): added tests for _manage_meta_init.
 
 * lib/manage_meta/manage_meta.rb (included): deleted 'included' method

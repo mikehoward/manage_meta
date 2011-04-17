@@ -1,5 +1,8 @@
 module ManageMeta
-  private
+  def included(mod)
+    mod.send(:helper_method, :render_meta) if mod.respond_to? :helper_method
+  end
+  
   #- initialize instance variables
   def _manage_meta_init
     return if @manage_meta_meta_hash.instance_of? Hash
@@ -31,7 +34,6 @@ module ManageMeta
   end
   
   #--
-  protected
 
   #++
   # add_meta(name, value[, options]) - adds meta tag 'name' with value 'value' to meta tags to be displayed
@@ -129,4 +131,8 @@ module ManageMeta
   def _manage_meta_name_to_sym(name)
     name.to_s.downcase.gsub(/[-_]+/, '_').to_sym
   end
+
+  public :add_meta, :del_meta, :add_meta_format, :render_meta
+  private :_manage_meta_init, :_manage_meta_sym_to_name, :_manage_meta_name_to_sym
+
 end
