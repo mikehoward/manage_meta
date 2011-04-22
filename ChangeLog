@@ -1,3 +1,16 @@
+2011-04-22 Mike Howard <mike@clove.com
+
+* version 0.0.12 (don't ask - I'm still learning git and ruby-gems)
+
+* lib/manage_meta/railtie.rb: converted initialization to using a railtie and
+   an initializer which adds the initialization code to ActiveSupport's on_load chain.
+* lib/manage_meta.rb: ripped out the monkey patch and conditionally require lib/manage_meta/railtie.rb
+
+* Rakefile: expanded to do more tasks
+
+* /tests/manage_meta_test.rb (test_helper_method_called): added test to insure that the ActiveController::Base
+  method 'helper_method' is called
+
 2011-04-17 Mike Howard <mike@clove.com>
 
 * lib/manage_meta/manage_meta.rb (included) restored 'included' to conditionally invoke 'helper_method'

@@ -7,7 +7,6 @@ end
 NoToS.send( :undef_method, :to_s )
 
 class ManageMetaTest < Test::Unit::TestCase
-  include ManageMeta
   
   # add refute methods for ruby 1.8.7
   if !self.instance_methods.include? :refute_respond_to
@@ -19,6 +18,15 @@ class ManageMetaTest < Test::Unit::TestCase
       assert ! expr, msg
     end
   end
+  
+  unless self.respond_to? :helper_method
+    def self.helper_method *args
+      @@helper_args = args
+    end
+  end
+
+  # include ManageMeta after setup
+  include ManageMeta
 
   def test__manage_meta_init
     refute self.instance_variables.map {|x| x.to_sym }.include?(:@manage_meta_meta_hash), "self does not contain @manage_meta_meta_hash"
@@ -155,4 +163,9 @@ class ManageMetaTest < Test::Unit::TestCase
     assert_match(/content="a value"/, render_meta, "render_meta tag for foo has content 'a value'")
   end
   
+  # test 'helper method called'
+  def test_helper_method_called
+    refute @@helper_args.nil?, "helper_method called with at least one argument"
+  end
+
 end

@@ -1,4 +1,3 @@
-puts "in #{__FILE__}: #{__LINE__}. self: #{self}"
 module ManageMeta
   def self.included(mod)
     begin

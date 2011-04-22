@@ -4,10 +4,18 @@ ManageMeta
 ManageMeta is yet another meta tag manager for Rails 3.x. Its features are: recognizes tags
 should render as HTTP-EQUIV; supports the Google 'canonical' link; is extensible; is non-intrusive
 
+NOTE: ManageMeta works by `include`ing itself into ActionController::Base via an `initializer`
+which is enclosed in ManageMeta::Railtie. This works for Rails 3.0.x - and should also work
+going forward - you're on your own for Rails 2.x
+
 How to use it
 -----------
 
 Include the gem by adding this to your Gemfile file
+
+`gem "manage_meta", ">=0.0.11"`
+
+or
 
 `gem "manage_meta", :git => "git://github.com/mikehoward/manage_meta.git"`
 
