@@ -23,7 +23,8 @@ end
 
 desc "commit changes"
 task :commit do
-  system 'git commit -a -m "checkin"'
+  system 'git add .'
+  system 'git commit -m "checkin"'
 end
 
 desc "commit changes and tag as #{manage_meta_version}"
