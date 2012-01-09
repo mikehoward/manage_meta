@@ -5,15 +5,24 @@ ManageMeta is yet another meta tag manager for Rails 3.x. Its features are: reco
 should render as HTTP-EQUIV; supports the Google 'canonical' link; is extensible; is non-intrusive
 
 NOTE: ManageMeta works by `include`ing itself into ActionController::Base via an `initializer`
-which is enclosed in ManageMeta::Railtie. This works for Rails 3.0.x - and should also work
-going forward - you're on your own for Rails 2.x
+which is enclosed in ManageMeta::Railtie. This works for Rails 3.0.x and 3.1.x. Don't know if it
+works in Rails 2.x
+
+What's New in Release 0.0.13?
+------------
+
+Support for Facebook Open Graph.
+
+It's a bit clunky, but it will work and can be used to use ManageMeta as a prerequisite
+for an Open Graph metadata handling module. I may do that 'one of these days', but until
+then, see sketch below.
 
 How to use it
 -----------
 
 Include the gem by adding this to your Gemfile file
 
-`gem "manage_meta", ">=0.0.11"`
+`gem "manage_meta", ">=0.0.13"`
 
 or
 
@@ -80,9 +89,9 @@ Here are the ugly details
 
 *add_meta()* accepts values in any of three formats:
 
-* `add_meta(name, value[, :format => :format_name])`
-* `add_meta(name, value[, :format => :format_name]) do ... end`
-* `add_meta(name[, :format => :format_name]) do ... end`
+* `add_meta(name, value[, :format => :format_name] [, :no_capitalize => true/false])`
+* `add_meta(name, value[, :format => :format_name][, :no_capitalize => true/false]) do ... end`
+* `add_meta(name[, :format => :format_name][, :no_capitalize => true/false]) do ... end`
 
 Arguments:
 
@@ -90,9 +99,12 @@ Arguments:
 attribute of the meta tag.
 * *value* must be something which responds to 'to_s' and is not a Hash. Normally it will simply
 be a string. If given, it supplies the leading part of the *content* attribute of the meta tag
-* The single *option* :format must supply an existing key in @manage_meta_format_hash. It is
+* The *option* :format must supply an existing key in @manage_meta_format_hash. It is
 used to associate a meta tag format with *name*. If not given and not currently defined
 in `@manage_meta_format_hash`, it will be set to *:named*. (see below for details)
+* The *option* :no_capitalize controls capitalization of each word in the *name* attribute
+when translated to a String. This was added to deal with Facebook Open Graph *property* tags
+which are of the form 'og:title' and 'fb:admins', etc. :no_capitalize should be a boolean.
 * The *optional block* is evaluated and the return value is used as the second [or only] part
 of the _content_ attribute of the meta tag.
 
@@ -166,3 +178,17 @@ Maps meta tag name symbols to meta tag format string symbols. Contains entries
 such as `:content_length => :http_equiv`
 
 both keys and values are symbols
+
+A Facebook Open Graph Sketch
+-----------------------
+
+First define an appropriate format:
+
+    `add_meta_format :property, '<meta property="#{name}" content="#{content}" char-encoding="utf-8">'`
+
+Then, add each Open Graph meta tag you need, specifying both :format and :no_capitalize options:
+
+    `add_meta 'og:title', 'This is a Title', :format => :property, :no_capitalize => true`
+    
+You can specify the Open Graph property name as a string (above) or as a symbol `:'og:title'`,
+but - inasmuch as they contain colons (:) - you need to enclose them in quotes.

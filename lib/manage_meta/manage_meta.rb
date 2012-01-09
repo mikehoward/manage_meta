@@ -10,6 +10,7 @@ module ManageMeta
   def _manage_meta_init
     return if @manage_meta_meta_hash.instance_of? Hash
     @manage_meta_meta_hash = {}
+    @manage_meta_options = {}
 
     @manage_meta_format_hash = {
       :named => '<meta name="#{name}" content="#{content}" char-encoding="utf-8" />',
@@ -44,12 +45,13 @@ module ManageMeta
   #  Note: if no both 'value' and 'block' are given, then the content of the meta tag is the concatenation
   #         of both values.
   #  options:
-  #    :format => symbol - where 'symbol' is one of :named, :http_equiv, :canonical, or a format
+  #    :format => symbol - where 'symbol' is one of :named, :http_equiv, :canonical, :property, or a format
   #       added with 'add_meta_format'
+  #    :no-capitalize  =>  true or false - default is false
   #    all other options keys are ignored
   #--
   def add_meta(name, opt_value = nil, options = {}, &block)
-    _manage_meta_init unless @manage_meta_meta_hash.instance_of? Hash
+    _manage_meta_init
     
     # make sure name is a string
     name = _manage_meta_name_to_sym name
@@ -60,11 +62,11 @@ module ManageMeta
       value = opt_value
       value += yield.to_s if block_given?
     when opt_value.is_a?(Hash)
-      raise ArgumentError, "Value for meta tag #{name} missing" if !block_given?
+      raise ArgumentError, "Value for meta tag #{name} missing" unless block_given?
       value = yield.to_s
       options = opt_value
     when opt_value.nil?
-      raise ArgumentError, "Value for meta tag #{name} missing" if !block_given?
+      raise ArgumentError, "Value for meta tag #{name} missing" unless block_given?
       value = yield.to_s
     when opt_value.respond_to?(:to_s)
       value = opt_value.to_s
@@ -74,16 +76,10 @@ module ManageMeta
     end
     @manage_meta_meta_hash[name] = value
 
-    if (options.keys - [:format]).size > 0
-      raise RuntimeError, "add_meta(#{name}, ...): illegal option key(s): #{options.keys - [:format]}"
-    end
+    _manage_meta_set_options name, options
 
     # if format is explicitly called out or if name is not yet known
-    if options.has_key?(:format)
-      raise RuntimeError, "Unsuported Format: #{options[:format]}: formats are #{@manage_meta_format_hash.keys.join(',')}" \
-            if !@manage_meta_format_hash.has_key?(options[:format].to_sym)
-      @manage_meta_name_to_format[name] = options[:format].to_sym
-    elsif !@manage_meta_name_to_format.has_key?(name)
+    unless @manage_meta_name_to_format.has_key?(name)
       @manage_meta_name_to_format[name] = :named
     end
   end
@@ -94,7 +90,7 @@ module ManageMeta
   # if _name_ is in @manage_meta_meta_hash, then it will be deleted
   #--
   def del_meta(name)
-    _manage_meta_init unless @manage_meta_meta_hash.instance_of? Hash
+    _manage_meta_init
     
     name = _manage_meta_name_to_sym name
     @manage_meta_meta_hash.delete name if @manage_meta_meta_hash.has_key? name
@@ -104,12 +100,13 @@ module ManageMeta
   # add_meta_format(key, format)
   #
   # adds the format _format_ to @manage_meta_format_hash using the key _key_
+  #  unless it is already defined
   #--
   def add_meta_format(key, format)
-    _manage_meta_init unless @manage_meta_meta_hash.instance_of? Hash
+    _manage_meta_init
     
-    key = key.to_sym
-    @manage_meta_format_hash[key] = format
+    key = _manage_meta_name_to_sym key
+    @manage_meta_format_hash[key] = format unless @manage_meta_format_hash[key]
   end
 
   #++
@@ -119,7 +116,7 @@ module ManageMeta
   # using their name-specific formats and indented two spaces.
   #--
   def render_meta
-    _manage_meta_init unless @manage_meta_meta_hash.instance_of? Hash
+    _manage_meta_init
     
     '  ' + @manage_meta_meta_hash.map do |name, content|
       @manage_meta_format_hash[@manage_meta_name_to_format[name]].sub('#{name}', _manage_meta_sym_to_name(name)).sub('#{content}', content)
@@ -128,13 +125,31 @@ module ManageMeta
   
   private
   def _manage_meta_sym_to_name(sym)
-    sym.to_s.split(/[_-]/).map {|x| x.capitalize }.join('-')
+    _manage_meta_init
+    @manage_meta_options[sym] && @manage_meta_options[sym][:no_capitalize] ? sym.to_s.gsub(/[-_]+/, '-') : sym.to_s.split(/[_-]/).map {|x| x.capitalize }.join('-')
   end
   
   def _manage_meta_name_to_sym(name)
     name.to_s.downcase.gsub(/[-_]+/, '_').to_sym
   end
 
+  def _manage_meta_set_options name, options
+    _manage_meta_init
+    options.keys.each do |option|
+      case option
+      when :format
+        raise RuntimeError, "Unsuported Format: #{options[:format]}: formats are #{@manage_meta_format_hash.keys.join(',')}" \
+              unless @manage_meta_format_hash.has_key? _manage_meta_name_to_sym(options[:format])
+        @manage_meta_name_to_format[name] = _manage_meta_name_to_sym options[:format]
+      when :no_capitalize
+        @manage_meta_options[name] = {} unless @manage_meta_options[name]
+        @manage_meta_options[name][option] = options[option]
+      else
+        raise RuntimeError, "add_meta(#{name}, ...): illegal option key(s): #{options.keys - [:format]}"
+      end
+    end
+  end
+  
   public :add_meta, :del_meta, :add_meta_format, :render_meta
   private :_manage_meta_init, :_manage_meta_sym_to_name, :_manage_meta_name_to_sym
 

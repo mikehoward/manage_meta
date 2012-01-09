@@ -21,14 +21,8 @@ task :gem do
   system 'gem build manage_meta.gemspec'
 end
 
-desc "commit changes"
-task :commit do
-  system 'git add .'
-  system 'git commit -m "checkin"'
-end
-
-desc "commit changes and tag as #{manage_meta_version}"
-task :tag => :commit do
+desc "tag as #{manage_meta_version}"
+task :tag do
   system "git tag #{manage_meta_version}"
 end
 

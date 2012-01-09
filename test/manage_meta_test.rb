@@ -1,5 +1,6 @@
 $LOAD_PATH << File.expand_path("../../lib",  __FILE__)
 require 'test/unit'
+require 'pry'
 require 'manage_meta'
 
 class NoToS
@@ -28,13 +29,13 @@ class ManageMetaTest < Test::Unit::TestCase
   # include ManageMeta after setup
   include ManageMeta
 
-  def test__manage_meta_init
+  def test_manage_meta_init
     refute self.instance_variables.map {|x| x.to_sym }.include?(:@manage_meta_meta_hash), "self does not contain @manage_meta_meta_hash"
     self.send(:_manage_meta_init)
     assert self.instance_variables.map {|x| x.to_sym }.include?(:@manage_meta_meta_hash), "self contains @manage_meta_meta_hash"
   end
 
-  def test__manage_meta_init_is_itempotent
+  def test_manage_meta_init_is_itempotent
     self.send(:_manage_meta_init)
     h = {}
     self.instance_variables.grep(/manage_meta/).each do |name|
@@ -63,17 +64,30 @@ class ManageMetaTest < Test::Unit::TestCase
     assert self.private_methods.grep(/_manage_meta_sym_to_name/), "has private method _manage_meta_sym_to_name"
   end
   
-  def test__manage_meta_sym_to_name
+  def test__manage_meta_set_options
+    _manage_meta_init
+    _manage_meta_set_options :foo, :format => :canonical, :no_capitalize => true
+    assert_equal :canonical, @manage_meta_name_to_format[:foo], "format of :foo should be canonical"
+    assert @manage_meta_options[:foo][:no_capitalize], ":foo should have no_capitalize flag set"
+  end
+
+  def test_manage_meta_sym_to_name
+    _manage_meta_init
+    @manage_meta_options[:'og:title'] = {}
+    @manage_meta_options[:'og:title'][:no_capitalize] = true
     {:foo => 'Foo', :foo_bar => "Foo-Bar", :foo_bar_baz => "Foo-Bar-Baz", "Foo-Bar" => "Foo-Bar",
-      "Foo_bar" => "Foo-Bar" }.each do |key, val|
-      assert_equal _manage_meta_sym_to_name(key), val, "_manage_meta_sym_to_name(#{key}) == #{val}"
+      "Foo_bar" => "Foo-Bar", :'og:title' => 'og:title'}.each do |key, val|
+      assert_equal val, _manage_meta_sym_to_name(key), "_manage_meta_sym_to_name(#{key}) == #{val}"
     end
   end
   
-  def test__manage_meta_name_to_sym
+  def test_manage_meta_name_to_sym
+    _manage_meta_init
+    @manage_meta_options[:'og:title'] = {}
+    @manage_meta_options[:'og:title'][:no_capitalize] = true
     { 'Foo'  => :foo, 'Foo-Bar' => :foo_bar, 'Foo--Bar_Baz' => :foo_bar_baz,
-      :foo_bar_baz => :foo_bar_baz, :foo____bar => :foo_bar }.each do |key, val|
-      assert_equal _manage_meta_name_to_sym(key), val, "_manage_meta_name_to_sym(#{key}) == #{val}"
+      :foo_bar_baz => :foo_bar_baz, :foo____bar => :foo_bar, 'og:title' => :'og:title' }.each do |key, val|
+      assert_equal val, _manage_meta_name_to_sym(key), "_manage_meta_name_to_sym(#{key}) == #{val}"
     end
   end
 
@@ -140,7 +154,7 @@ class ManageMetaTest < Test::Unit::TestCase
   
   # test 'add_meta_format' do
   def test_add_meta_format_adds_a_format
-    format = '<meta foo-type="#{name}" content="#{content}"'
+    format = '<meta foo-type="#{name}" content="#{content}">'
     add_meta_format(:foo, format)
     assert self.instance_variable_get("@manage_meta_format_hash").key?(:foo),
       "add_meta_format adds key to format_hash using symbol"
@@ -168,4 +182,11 @@ class ManageMetaTest < Test::Unit::TestCase
     refute @@helper_args.nil?, "helper_method called with at least one argument"
   end
 
+  # test open graph metadata
+  def test_adding_og_metadata
+    format = '<meta property="#{name}" content="#{content}">'
+    add_meta_format(:property, format)
+    add_meta "og:title", 'The Grand Octopus', :format => :property, :no_capitalize => true
+    assert_match '<meta property="og:title" content="The Grand Octopus">', render_meta, "og:title metadata should be correct"
+  end
 end
