@@ -10,6 +10,10 @@
 	include an http-equiv meta for content encoding
 	- for HTML5 - insert a <meta charset="encoding type"> immediately
 	after <head> tag.
+* manage_meta_test.rb: added tests for
+	'manage_meta_set_encoding()' and 'manage_meta_set_html_version()'
+* README.markdown: added text describing new features and how this changes
+	where to place the 'render_meta()' call
 
 2011-04-22 Mike Howard <mike@clove.com>
 
