@@ -1,10 +1,25 @@
-2011-04-22 Mike Howard <mike@clove.com
+2012-04-10 Mike Howard <mike@clove.com>
+
+* version 0.0.14.pre
+* manage_meta.rb; README.markdown: corrected error in charset
+	designations.
+	- adding support for HTML version. Support will include XHTML,
+	HTML4.01, & HTML5. (I'm not sure what this means yet)
+	- added support for alternate encoding methods.
+	- for XHTML & HTML 4.01, capture 'content_type' tag (or lack) and
+	include an http-equiv meta for content encoding
+	- for HTML5 - insert a <meta charset="encoding type"> immediately
+	after <head> tag.
+
+2011-04-22 Mike Howard <mike@clove.com>
 
 * version 0.0.12 (don't ask - I'm still learning git and ruby-gems)
 
 * lib/manage_meta/railtie.rb: converted initialization to using a railtie and
-   an initializer which adds the initialization code to ActiveSupport's on_load chain.
-* lib/manage_meta.rb: ripped out the monkey patch and conditionally require lib/manage_meta/railtie.rb
+  an initializer which adds the initialization code to ActiveSupport's on_load
+  chain.
+* lib/manage_meta.rb: ripped out the monkey patch and conditionally
+  require lib/manage_meta/railtie.rb
 
 * Rakefile: expanded to do more tasks
 

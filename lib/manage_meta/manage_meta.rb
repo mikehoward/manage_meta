@@ -1,4 +1,9 @@
 module ManageMeta
+  LEGAL_HTML_VALUES = {
+    html4: /^html\s*4(.01)?$/i,
+    html5: /^html\s*5$/i,
+    xhtml: /^xhtml\s*(1(\.0)?)?$/i
+  }
   def self.included(mod)
     begin
       mod.send(:helper_method, :render_meta)
@@ -9,12 +14,14 @@ module ManageMeta
   #- initialize instance variables
   def _manage_meta_init
     return if @manage_meta_meta_hash.instance_of? Hash
+    @manage_meta_html_version = :html5
+    @manage_meta_encoding = 'utf-8'
     @manage_meta_meta_hash = {}
     @manage_meta_options = {}
 
     @manage_meta_format_hash = {
-      :named => '<meta name="#{name}" content="#{content}" char-encoding="utf-8" />',
-      :http_equiv => '<meta http-equiv="#{name}" content="#{content}" char-encoding="utf-8" />',
+      :named => '<meta name="#{name}" content="#{content}" />',
+      :http_equiv => '<meta http-equiv="#{name}" content="#{content}" />',
       :canonical => '<link rel="canonical" href="#{content}" />',
     }
 
@@ -56,7 +63,7 @@ module ManageMeta
     # make sure name is a string
     name = _manage_meta_name_to_sym name
 
-    # handle optional nonsense
+    # handle optional
     case
     when opt_value.is_a?(String)
       value = opt_value
@@ -113,14 +120,49 @@ module ManageMeta
   # render_meta
   #
   # returns a string consisting of all defined meta names in @manage_meta_meta_hash, formatted
-  # using their name-specific formats and indented two spaces.
+  # using their name-specific formats and indented with two spaces.
   #--
   def render_meta
     _manage_meta_init
-    
-    '  ' + @manage_meta_meta_hash.map do |name, content|
+
+    leader = '  '
+    if @manage_meta_html_version == :html5
+      # insert charset meta tag immediately after <head>
+      leader += "<meta charset=\"#{@manage_meta_encoding}\">\n  "
+    else  # covers both xhtml and html 4.01
+      # augment content_type meta tag with charset encoding and move to top of meta tags
+      if (value = @manage_meta_meta_hash.delete(:content_type)) \
+        and value !~ /charset/i
+        leader += "<meta http-equiv=\"Content-type\" content=\"text/html; charset=#{@manage_meta_encoding}\" />\n  "
+      end
+    end
+
+    leader + @manage_meta_meta_hash.map do |name, content|
       @manage_meta_format_hash[@manage_meta_name_to_format[name]].sub('#{name}', _manage_meta_sym_to_name(name)).sub('#{content}', content)
     end.join("\n  ") + "  \n"
+  end
+  
+  #++
+  # set_encoding encoding - sets character encoding for page
+  #--
+  
+  def manage_meta_set_encoding encoding
+    @manage_meta_encoding = encoding
+  end
+  
+  #++
+  # manage_meta_set_html_version version
+  #
+  # 
+  #--
+  def manage_meta_set_html_version version = 'html5'
+    version_downcase = version.to_s.downcase.strip
+    LEGAL_HTML_VALUES.each do |html_key, regx|
+      next unless version_downcase =~ regx
+      @manage_meta_html_version = html_key
+      return
+    end
+    raise ArgumentError.new("Illegal html version: #{version}")
   end
   
   private

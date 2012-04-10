@@ -189,4 +189,33 @@ class ManageMetaTest < Test::Unit::TestCase
     add_meta "og:title", 'The Grand Octopus', :format => :property, :no_capitalize => true
     assert_match '<meta property="og:title" content="The Grand Octopus">', render_meta, "og:title metadata should be correct"
   end
+
+  # test_set_encoding
+  def test_set_encoding
+    self.manage_meta_set_encoding 'foobar'
+    assert_equal 'foobar', self.instance_variable_get('@manage_meta_encoding')
+  end
+
+  # test html version
+  def test_set_html_version
+    self.send :_manage_meta_init
+    assert_equal :html5, self.instance_variable_get('@manage_meta_html_version')
+    ['html5/HTML 5', 'html5/HTML5',
+     'html4/html 4', 'html4/ html 4.01', 'xhtml/ xhtml/xhtml 1.0',
+     'xhtml/xhtml1' ].each do |str|
+      key, version = str.split('/')
+      self.manage_meta_set_html_version version
+      assert_equal key.to_sym, self.instance_variable_get('@manage_meta_html_version')
+    end
+  end
+
+  # test charset encoding in render_meta
+  def test_charset_encoding_in_render_meta
+    self.send :_manage_meta_init
+    assert_match /<meta charset="utf-8">/, self.render_meta
+
+    self.manage_meta_set_html_version 'html4'
+    self.add_meta :content_type, 'text/html'
+    assert_match /<meta http-equiv="Content-Type" content="text\/html; charset=utf-8"/i, self.render_meta
+  end
 end
