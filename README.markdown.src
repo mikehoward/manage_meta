@@ -1,4 +1,4 @@
-ManageMeta - Version: 0.0.14.pre2
+ManageMeta - Version: VERSION
 ============
 
 ManageMeta is yet another meta tag manager for Rails 3.x. Its features
@@ -10,7 +10,7 @@ ActionController::Base via an `initializer` which is enclosed in
 ManageMeta::Railtie. This works for Rails 3.0.x and 3.1.x. Don't know
 if it works in Rails 2.x
 
-What's New in Release 0.0.14.pre2?
+What's New in Release VERSION?
 ------------
 
 Support for Facebook Open Graph.
