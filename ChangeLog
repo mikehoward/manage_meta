@@ -4,9 +4,10 @@
 	control whether or not we automatically emit encoding meta tag.
 
 	* lib/manage_meta/manage_meta.rb
-	(ManageMeta#manage_meta_emit_encoding):  added instance variable
-	@manage_meta_emit_encoding and accessors to support control of
-	manual encoding versus automatic
+	(ManageMeta#manage_meta_emit_encoding): added class variable
+	@@manage_meta_emit_encoding and
+	manage_meta_set_emit_encoding(bool) to support control of manual
+	encoding versus automatic
 
 	* test/manage_meta_test.rb (ManageMetaTest#test_emit_encoding):
 	added tests for manage_meta_emit_encoding control

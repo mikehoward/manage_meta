@@ -16,7 +16,7 @@ module ManageMeta
     return if @manage_meta_meta_hash.instance_of? Hash
     @manage_meta_html_version = :html5
     @manage_meta_encoding = 'utf-8'
-    @manage_meta_emit_encoding = nil
+    @@manage_meta_emit_encoding = true
     @manage_meta_meta_hash = {}
     @manage_meta_options = {}
 
@@ -127,7 +127,7 @@ module ManageMeta
     _manage_meta_init
 
     leader = '  '
-    if manage_meta_emit_encoding
+    if @@manage_meta_emit_encoding
       if @manage_meta_html_version == :html5
         # insert charset meta tag immediately after <head>
         leader += "<meta charset=\"#{@manage_meta_encoding}\">\n  "
@@ -145,16 +145,8 @@ module ManageMeta
     end.join("\n  ") + "  \n"
   end
   
-  #++
-  # manage_meta_emit_encoding
-  #--
-  def manage_meta_emit_encoding
-    @manage_meta_emit_encoding = true if @manage_meta_emit_encoding.nil?
-    @manage_meta_emit_encoding
-  end
-
-  def manage_meta_emit_encoding= bool
-    @manage_meta_emit_encoding = !!bool
+  def manage_meta_set_emit_encoding bool
+    @@manage_meta_emit_encoding = !!bool
   end
 
   #++

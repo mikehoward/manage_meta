@@ -10,7 +10,7 @@ ActionController::Base via an `initializer` which is enclosed in
 ManageMeta::Railtie. This works for Rails 3.0.x and 3.1.x. Don't know
 if it works in Rails 2.x
 
-What's New in Release 0.0.13?
+What's New in Release 0.0.14?
 ------------
 
 Support for Facebook Open Graph.
@@ -74,10 +74,8 @@ The public methods are:
 * `add_meta_format()` - which adds a meta tag format
 * `render_meta()` - which returns a string rendering all currently
 * defined meta tags.
-* `manage_meta_emit_encoding` - boolean which sets whether or not to
-emit encoding `meta` tag defaults to `true`.
-* `manage_meta_emit_encoding=` - setter for manage_meta_emit_encoding.
-(set to false if you want to include your encoding by hand)
+* `manage_meta_set_emit_encoding(bool)` - sets @@manage_meta_emit_encoding.
+(set to false if you want to include your encoding by hand) [default is `true`]
 * `manage_meta_set_encoding()` - allows setting character encoding
 * `manage_meta_set_html_version()` - allows setting html version to
 html5, html4, or xhtml
@@ -104,6 +102,23 @@ The Details
 --------------
 
 Here are the ugly details
+
+### charset meta tags ###
+
+`charset` meta tags are ONLY emitted if the class variable
+`@@manage_meta_set_encoding` is `true`.  Inasmuch as `ManageMeta` is
+included in ApplicationController::Base, this effects all controllers.
+
+You control the value of this variable using
+`manage_meta_set_emit_encoding()`. The default is `true`, so the
+charset meta tags are emitted - subject to . . .
+
+NOTE: If @@manage_meta_emit_encoding is `true`, character encoding
+strings are
+
+* always emitted for HTML 5 pages
+* Only emitted for HTML 4.01 and XHTML pages IF a `:content_type` meta
+tag is added via `add_meta()`
 
 ### Methods in Detail ###
 
@@ -168,22 +183,16 @@ simply goes through all the defined key, value pairs in @manage_meta_meta_hash a
 returns their associated format strings after replacing the `#{name}` and `#{content}`
 symbols with their values.
 
-`#{name}` is replaced with the meta tag key [as in `:content_type`] passed through
-`_manage_meta_sym_to_name()`.
+`#{name}` is replaced with the meta tag key [as in `:content_type`]
+passed through `_manage_meta_sym_to_name()`.
 
 `#{value}` is replaced by the value assigned in `@manage_meta_meta_hash`.
 
 #### manage_meta_set_encoding( encoding ) ####
 
-sets the instance variable `@manage_meta_encoding` to `encoding`.
+Sets the instance variable `@manage_meta_encoding` to `encoding`.
 The default value is `utf-8`, so don't bother unless you're using
 something else.
-
-NOTE: Character encoding strings are
-
-* always emitted for HTML 5 pages
-* Only emitted for HTML 4.01 and XHTML pages IF a `content_type` meta
-tag is added via `add_meta()`
 
 #### manage_meta_set_html_version( version ) ####
 
@@ -227,7 +236,7 @@ such as `:content_length => :http_equiv`
 
 both keys and values are symbols
 
-#### `@manage_meta_emit_encoding` ####
+#### `@@manage_meta_emit_encoding` ####
 
 Boolean which is `true` or `false`. Controls whether or not an
 encoding meta tag is emitted

@@ -222,10 +222,8 @@ class ManageMetaTest < Test::Unit::TestCase
   # test set emit encoding
   def test_emit_encoding
     self.send :_manage_meta_init
-    assert_nil @manage_meta_emit_encoding
-    assert manage_meta_emit_encoding
-    self.manage_meta_emit_encoding = false
-    assert_equal false, @manage_meta_emit_encoding
-    refute manage_meta_emit_encoding
+    assert @@manage_meta_emit_encoding
+    self.manage_meta_set_emit_encoding false
+    assert_equal false, @@manage_meta_emit_encoding
   end
 end
