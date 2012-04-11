@@ -1,3 +1,16 @@
+2012-04-11  Mike Howard  <mikehoward@Mikes-MacBook-Air.local>
+
+	* README.markdown (NOTE): added documentation for new feature to
+	control whether or not we automatically emit encoding meta tag.
+
+	* lib/manage_meta/manage_meta.rb
+	(ManageMeta#manage_meta_emit_encoding):  added instance variable
+	@manage_meta_emit_encoding and accessors to support control of
+	manual encoding versus automatic
+
+	* test/manage_meta_test.rb (ManageMetaTest#test_emit_encoding):
+	added tests for manage_meta_emit_encoding control
+
 2012-04-10 Mike Howard <mike@clove.com>
 
 * version 0.0.14.pre

@@ -16,6 +16,7 @@ module ManageMeta
     return if @manage_meta_meta_hash.instance_of? Hash
     @manage_meta_html_version = :html5
     @manage_meta_encoding = 'utf-8'
+    @manage_meta_emit_encoding = nil
     @manage_meta_meta_hash = {}
     @manage_meta_options = {}
 
@@ -126,14 +127,16 @@ module ManageMeta
     _manage_meta_init
 
     leader = '  '
-    if @manage_meta_html_version == :html5
-      # insert charset meta tag immediately after <head>
-      leader += "<meta charset=\"#{@manage_meta_encoding}\">\n  "
-    else  # covers both xhtml and html 4.01
-      # augment content_type meta tag with charset encoding and move to top of meta tags
-      if (value = @manage_meta_meta_hash.delete(:content_type)) \
-        and value !~ /charset/i
-        leader += "<meta http-equiv=\"Content-type\" content=\"text/html; charset=#{@manage_meta_encoding}\" />\n  "
+    if manage_meta_emit_encoding
+      if @manage_meta_html_version == :html5
+        # insert charset meta tag immediately after <head>
+        leader += "<meta charset=\"#{@manage_meta_encoding}\">\n  "
+      else  # covers both xhtml and html 4.01
+        # augment content_type meta tag with charset encoding and move to top of meta tags
+        if (value = @manage_meta_meta_hash.delete(:content_type)) \
+          and value !~ /charset/i
+          leader += "<meta http-equiv=\"Content-type\" content=\"text/html; charset=#{@manage_meta_encoding}\" />\n  "
+        end
       end
     end
 
@@ -143,7 +146,19 @@ module ManageMeta
   end
   
   #++
-  # set_encoding encoding - sets character encoding for page
+  # manage_meta_emit_encoding
+  #--
+  def manage_meta_emit_encoding
+    @manage_meta_emit_encoding = true if @manage_meta_emit_encoding.nil?
+    @manage_meta_emit_encoding
+  end
+
+  def manage_meta_emit_encoding= bool
+    @manage_meta_emit_encoding = !!bool
+  end
+
+  #++
+  # manage_meta_set_encoding encoding - sets character encoding for page
   #--
   
   def manage_meta_set_encoding encoding

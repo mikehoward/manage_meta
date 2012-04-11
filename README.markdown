@@ -64,7 +64,7 @@ document is an HTML5 OR (2) it is HTML 4 or XHTML and you
 What it Adds
 ------------
 
-ManageMeta defines seven (7) methods and three (3) instance variables
+ManageMeta defines seven (9) methods and three (6) instance variables
 into all classes derived from ApplicationController
 
 The public methods are:
@@ -74,6 +74,10 @@ The public methods are:
 * `add_meta_format()` - which adds a meta tag format
 * `render_meta()` - which returns a string rendering all currently
 * defined meta tags.
+* `manage_meta_emit_encoding` - boolean which sets whether or not to
+emit encoding `meta` tag defaults to `true`.
+* `manage_meta_emit_encoding=` - setter for manage_meta_emit_encoding.
+(set to false if you want to include your encoding by hand)
 * `manage_meta_set_encoding()` - allows setting character encoding
 * `manage_meta_set_html_version()` - allows setting html version to
 html5, html4, or xhtml
@@ -222,6 +226,21 @@ Maps meta tag name symbols to meta tag format string symbols. Contains entries
 such as `:content_length => :http_equiv`
 
 both keys and values are symbols
+
+#### `@manage_meta_emit_encoding` ####
+
+Boolean which is `true` or `false`. Controls whether or not an
+encoding meta tag is emitted
+
+#### `@manage_meta_encoding` ####
+
+String which is used in the `charset` meta tag which is emitted
+
+#### `@manage_meta_html_version` ####
+
+Symbol which represents the html version used in the page. Possible
+values are `html4`, `html4`, and `xhtml`.  Currently only used to
+control what type of `charset` encoding meta tag to emit.
 
 A Facebook Open Graph Sketch
 -----------------------

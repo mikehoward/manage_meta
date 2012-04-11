@@ -218,4 +218,14 @@ class ManageMetaTest < Test::Unit::TestCase
     self.add_meta :content_type, 'text/html'
     assert_match /<meta http-equiv="Content-Type" content="text\/html; charset=utf-8"/i, self.render_meta
   end
+
+  # test set emit encoding
+  def test_emit_encoding
+    self.send :_manage_meta_init
+    assert_nil @manage_meta_emit_encoding
+    assert manage_meta_emit_encoding
+    self.manage_meta_emit_encoding = false
+    assert_equal false, @manage_meta_emit_encoding
+    refute manage_meta_emit_encoding
+  end
 end
